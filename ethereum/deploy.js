@@ -1,6 +1,6 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const { Web3 } = require('web3');
-const { abi, evm } = require('./builds/CampaignFactory-v0.0.1.json');
+const { abi, evm } = require('./builds/CampaignFactory-v0.0.2.json');
 const path = require('path');
 const fs = require('fs-extra');
 
@@ -12,7 +12,7 @@ const endpoint = 'https://sepolia.infura.io/v3/22814a84a4ab473bb5586697bea1e5b5'
 const provider = new HDWalletProvider( pnemonic, endpoint);
 
 const web3 = new Web3(provider);
-const version = '0.0.1';
+const version = '0.0.2';
 const deploy = async () => {
     let accounts = await web3.eth.getAccounts();
     console.log('Deploying contract from address: ', accounts[0]);

@@ -10,7 +10,7 @@ contract CampaignFactory
         _creator = msg.sender;
     }
 
-    function createCampaing(string memory name, uint minAmount) external{
+    function createCampaign(string memory name, uint minAmount) external{
         address newCampaign = address(new Campaign(name, minAmount, msg.sender));
         _deployedCampaigns.push(newCampaign);
     }
