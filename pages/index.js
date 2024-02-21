@@ -38,21 +38,23 @@ class CampaignIndex extends Component{
             };
         });
 
-        return <Card.Group items={items}></Card.Group>
+        return <Card.Group items={items}> 
+           
+        </Card.Group>
     }
     render() {
-        return <Layout>
-            <div> 
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-                <hr />
-                {this.renderCampaigns()}
+        return (
+            <Layout>
+                <h3> Open Campaigns </h3>
                 <Button 
+                    floated='right'
                     content="Create Campaign"
                     icon="add circle"
                     primary
                 />
-            </div> 
-        </Layout> 
+                {this.renderCampaigns()}
+            </Layout>
+        ) 
     }
 }
 

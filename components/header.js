@@ -3,20 +3,17 @@ import { Menu, Button } from 'semantic-ui-react'
 
 const Header = () => {
     return ( 
-        <Menu>
+        <Menu style={{marginTop: '10px'}}>
             <Menu.Item>
                 Tolicoins
             </Menu.Item>
             <Menu.Menu position="right">
                 <Menu.Item>
-                    <Button 
-                        content="Campaigns"
-                        primary
-                    />
+                    Campaigns
                 </Menu.Item>
                 <Menu.Item>
                     <Button 
-                        content="+"
+                        icon="add circle"
                         secondary
                     />
                 </Menu.Item>
