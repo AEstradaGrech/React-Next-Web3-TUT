@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu } from 'semantic-ui-react'
+import { Menu, Button } from 'semantic-ui-react'
 
 const Header = () => {
     return ( 
@@ -9,10 +9,16 @@ const Header = () => {
             </Menu.Item>
             <Menu.Menu position="right">
                 <Menu.Item>
-                    Campaigns
+                    <Button 
+                        content="Campaigns"
+                        primary
+                    />
                 </Menu.Item>
                 <Menu.Item>
-                    +
+                    <Button 
+                        content="+"
+                        secondary
+                    />
                 </Menu.Item>
             </Menu.Menu>
         </Menu>
