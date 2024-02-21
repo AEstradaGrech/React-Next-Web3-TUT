@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { Card } from 'semantic-ui-react';
 import factory from '../ethereum/factory.js'
+import Layout from '../components/layout.js';
+import { Button } from 'semantic-ui-react';
+
 class CampaignIndex extends Component{
 
     //next js initialization lifecycle hook
@@ -38,12 +41,18 @@ class CampaignIndex extends Component{
         return <Card.Group items={items}></Card.Group>
     }
     render() {
-        return <div> 
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-            <h1>Campaign Index Page!</h1>
-            <hr />
-            {this.renderCampaigns()}
-        </div> 
+        return <Layout>
+            <div> 
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+                <hr />
+                {this.renderCampaigns()}
+                <Button 
+                    content="Create Campaign"
+                    icon="add circle"
+                    primary
+                />
+            </div> 
+        </Layout> 
     }
 }
 
