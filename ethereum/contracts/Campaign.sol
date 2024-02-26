@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 contract CampaignFactory
 {
     address[] private _deployedCampaigns;
+    mapping(address => string) private _campaigns;
     address private _creator;
     constructor()
     {
@@ -13,6 +14,7 @@ contract CampaignFactory
     function createCampaign(string memory name, uint minAmount) external{
         address newCampaign = address(new Campaign(name, minAmount, msg.sender));
         _deployedCampaigns.push(newCampaign);
+        _campaigns[newCampaign] = name;
     }
 
     function getDeployedCampaigns() external view returns(address[] memory)
@@ -20,6 +22,10 @@ contract CampaignFactory
         return _deployedCampaigns;
     }
 
+    function getCampaignDescription(address campaignAddress) external view returns(string memory)
+    {
+        return _campaigns[campaignAddress];
+    }
     function getCreatorAddress() external view returns(address){
         return _creator;
     }
