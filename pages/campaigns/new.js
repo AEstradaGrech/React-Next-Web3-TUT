@@ -1,11 +1,64 @@
 import React, { Component } from 'react';
 import Layout from '../../components/layout';
+import factory from '../../ethereum/factory.js';
+import web3 from '../../ethereum/web3.js'
+import { Form, Button, Input, Message } from 'semantic-ui-react'
+
 class NewCampaignComponent extends Component
 {
+    state = {
+        campaignName: '',
+        minimumContribution: '',
+        errorMessage: '',
+        loading: false
+    }
+
+    onSubmit = async (event) =>{
+        
+        console.log(' :: EVENT VAL :: \n', event);
+        this.setState({loading: true, errorMessage: ''});
+        try{
+        let accounts = await web3.eth.getAccounts();
+
+        await factory.methods.createCampaign(this.state.campaignName, web3.utils.toWei(this.state.minimumContribution, 'ether'))
+                             .send({from: accounts[0], arguments: [event]})
+        }catch(error){
+            this.setState({errorMessage: error.message })
+            this.handleErrorFadeOut();
+        }
+        
+        this.setState({ loading: false});
+    }
+
+    handleErrorFadeOut = () => {
+        setTimeout(() => {
+            this.setState({errorMessage: ''});
+        }, 5000)
+    }
+
     render(){
         return (
             <Layout>
-                <h1>New Campaign Page</h1>
+                <h3>Create Campaign</h3>
+                <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
+                    <Form.Field>
+                        <label>Campaign Name</label>
+                        <Input 
+                            value={this.state.campaignName}
+                            onChange={event => this.setState({campaignName: event.target.value })} />
+                    </Form.Field>
+                    <Form.Field>
+                        <label>Minimum Contribution</label>
+                        <Input 
+                            label='eth'
+                            labelPosition='right'
+                            value={this.state.minimumContribution}
+                            onChange={event => this.setState({minimumContribution: event.target.value })} /> 
+                    </Form.Field>
+                    
+                    <Message error header='Oops!' content={this.state.errorMessage } />
+                    <Button primary loading={this.state.loading}> Deploy </Button>
+                </Form>
             </Layout>
         )
     }
