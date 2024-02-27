@@ -9,13 +9,10 @@ class CampaignIndex extends Component{
     //next js initialization lifecycle hook
     // adds any required data to nextJs's 'props' object
     static async getInitialProps() {
-        let campaigns = await factory.methods.getDeployedCampaigns().call();
-        console.log(campaigns);
-        let manager = await factory.methods.getCreatorAddress().call();
-
-        console.log(' :: CAMPAIGN MANAGER ADDRESS :: ', manager);
-
-        return { campaigns };
+        let campaigns = await factory.methods.getCampaigns().call();
+        
+        let factoryManager = await factory.methods.getCreatorAddress().call();
+        return { campaigns, factoryManager };
     }
 
     // async componentDidMount(){
@@ -30,10 +27,10 @@ class CampaignIndex extends Component{
 
     renderCampaigns()
     {
-        const items = this.props.campaigns.map(address => {
+        const items = this.props.campaigns.map(data => {
             return {
-                header: <a>Campain Name</a>,
-                description: address,
+                header: <a>{data.name}</a>,
+                description: data.campaignAddress,
                 fluid:true
             };
         });

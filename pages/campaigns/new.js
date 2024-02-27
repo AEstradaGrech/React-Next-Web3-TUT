@@ -3,6 +3,7 @@ import Layout from '../../components/layout';
 import factory from '../../ethereum/factory.js';
 import web3 from '../../ethereum/web3.js'
 import { Form, Button, Input, Message } from 'semantic-ui-react'
+import { Link, Router } from '../../routes.js'
 
 class NewCampaignComponent extends Component
 {
@@ -10,18 +11,24 @@ class NewCampaignComponent extends Component
         campaignName: '',
         minimumContribution: '',
         errorMessage: '',
+        successMessage: '',
         loading: false
     }
 
     onSubmit = async (event) =>{
         
-        console.log(' :: EVENT VAL :: \n', event);
-        this.setState({loading: true, errorMessage: ''});
+        event.preventDefault();
+
+        this.setState({loading: true, errorMessage: '', successMessage: ''});
         try{
         let accounts = await web3.eth.getAccounts();
 
         await factory.methods.createCampaign(this.state.campaignName, web3.utils.toWei(this.state.minimumContribution, 'ether'))
                              .send({from: accounts[0], arguments: [event]})
+        this.setState({successMessage: `Campaign ${this.state.campaignName} successfully deployed!`})
+        setTimeout(() => {
+            Router.pushRoute('/')
+        }, 3000)
         }catch(error){
             this.setState({errorMessage: error.message })
             this.handleErrorFadeOut();
@@ -40,7 +47,7 @@ class NewCampaignComponent extends Component
         return (
             <Layout>
                 <h3>Create Campaign</h3>
-                <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
+                <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage} success={!!this.state.successMessage}>
                     <Form.Field>
                         <label>Campaign Name</label>
                         <Input 
@@ -57,6 +64,7 @@ class NewCampaignComponent extends Component
                     </Form.Field>
                     
                     <Message error header='Oops!' content={this.state.errorMessage } />
+                    <Message success header='Cool!' content={this.state.successMessage } />
                     <Button primary loading={this.state.loading}> Deploy </Button>
                 </Form>
             </Layout>
