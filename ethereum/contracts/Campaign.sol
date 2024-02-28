@@ -58,6 +58,13 @@ contract Campaign
         mapping(address => bool) approvers;
     }
 
+    struct Summary {
+        address manager;
+        string description;
+        uint minContribution;
+        uint balance;
+        uint contributors;
+    }
 
     string _description;
     address private _manager;
@@ -94,7 +101,22 @@ contract Campaign
         return address(this).balance / 1 ether;
     }
  
+    function getSummary() external view returns(Summary memory)
+    {
+        Summary memory data  = Summary({
+            manager: _manager,
+            description: _description,
+            minContribution: _minimumContribution,
+            balance: address(this).balance,         //lo devuelvo en Wei y si eso ya lo paso a eth con web3.utils (para contribuciones muy pequeñas / !redondeo)
+            contributors: _approversCount
+        });
 
+        return data;
+    }
+
+    function getApproversCount() external view returns(uint){
+        return _approversCount;
+    }
     function contribute() public payable{
         require(msg.value / 1 ether >= _minimumContribution);
         require(approvers[msg.sender] == 0);
