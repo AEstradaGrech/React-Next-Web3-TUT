@@ -27,7 +27,7 @@ const input = {
 const output = JSON.parse(solc.compile(JSON.stringify(input))).contracts['Campaign.sol'];
 
 fs.ensureDirSync(buildPath);
-const version = '0.0.5';
+const version = '0.0.6';
 for (let contract in output)
 {
    fs.outputJSONSync(path.resolve(buildPath, `${contract}-v${version}.json`), output[contract]);

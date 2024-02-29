@@ -17,8 +17,8 @@ contract CampaignFactory
         _creator = msg.sender;
     }
 
-    function createCampaign(string memory name, uint minAmount) external{
-        address newCampaign = address(new Campaign(name, minAmount, msg.sender));
+    function createCampaign(string memory name, string memory desc, uint minAmount) external{
+        address newCampaign = address(new Campaign(name, desc, minAmount, msg.sender));
         _deployedCampaigns.push(newCampaign);
 
 
@@ -60,23 +60,26 @@ contract Campaign
 
     struct Summary {
         address manager;
+        string name;
         string description;
         uint minContribution;
         uint balance;
         uint contributors;
     }
 
-    string _description;
+    string private _name;
+    string private _description;
     address private _manager;
     mapping(address => uint) public approvers;
-    uint _approversCount;
+    uint private _approversCount;
     uint private _minimumContribution;
     mapping(string => Request) public requests;
 
-    constructor (string memory description, uint minimum, address mngr)
+    constructor (string memory name, string memory description, uint minimum, address mngr)
     {
         require(minimum > 0);
         _manager = mngr;
+        _name = name;
         _description = description; 
         _minimumContribution = minimum;
     }
@@ -86,6 +89,10 @@ contract Campaign
         return _manager;
     }
 
+    function getCampaignName() external view returns (string memory)
+    {
+        return _name;
+    }
     function getDescription() external view returns (string memory)
     {
         return _description;
@@ -105,6 +112,7 @@ contract Campaign
     {
         Summary memory data  = Summary({
             manager: _manager,
+            name: _name,
             description: _description,
             minContribution: _minimumContribution,
             balance: address(this).balance,         //lo devuelvo en Wei y si eso ya lo paso a eth con web3.utils (para contribuciones muy pequeñas / !redondeo)
