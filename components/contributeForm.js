@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Form, Button, Input, Message } from 'semantic-ui-react';
 import Campaign from '../ethereum/campaign.js';
+import web3 from '../ethereum/web3.js'
 
 class ContributeFormComponent extends Component {
     
@@ -10,14 +11,15 @@ class ContributeFormComponent extends Component {
         errorMessage: '',
         successMessage: ''
     }
-    
+    //componentDidMount() -> campaignInstance
     onSubmit = async (event) => {
         event.preventDefault();
         this.setState({loading: true, errorMessage: '', successMessage: ''});
         try{
+            let campaign = Campaign(this.props.address);
+            let accounts = await web3.eth.getAccounts();
+            await campaign.methods.contribute().send({from: accounts[0], value: web3.utils.toWei(this.state.value, 'ether')});
             this.setState({loading: false, successMessage: 'Successful contribution' });
-
-            
         }
         catch(error){
             this.setState({loading: false, errorMessage: error.message });
@@ -38,8 +40,8 @@ class ContributeFormComponent extends Component {
                     
                 </Form.Field>
                 <Button primary loading={this.state.loading}>Contribute </Button>
-                <Message error header='Oops!' description={this.state.errorMessage}/>
-                <Message success header='Great!' description={this.state.successMessage}/>
+                <Message error header='Oops!' content={this.state.errorMessage}/>
+                <Message success header='Great!' content={this.state.successMessage}/>
             </Form>
         )
     }
