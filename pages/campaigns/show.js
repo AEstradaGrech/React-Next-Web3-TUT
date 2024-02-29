@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { Card } from 'semantic-ui-react';
+import { Card, Grid } from 'semantic-ui-react';
 import web3 from '../../ethereum/web3.js'
 import Campaign from '../../ethereum/campaign.js'
 import Layout from '../../components/layout';
+import ContributeForm from '../../components/contributeForm.js'
 
 class CampaignShowComponent extends Component{
 
@@ -14,18 +15,31 @@ class CampaignShowComponent extends Component{
         const summary = await campaign.methods.getSummary().call();
         console.log(summary);
         return{
+            address: props.query.address,
             managerAddress: summary.manager,
-            title: summary.description, 
+            title: summary.name,
+            description: summary.description, 
             minContribution: web3.utils.fromWei(summary.minContribution, 'ether'),
             totalContribution: web3.utils.fromWei(summary.balance, 'ether'),
             contributors: parseInt(summary.contributors) 
         }
     }
 
+    renderHeaderCard()
+    {
+        const items = [
+            {
+                header:this.props.title,
+                description: this.props.description,
+                fluid:true
+            }
+        ]
+
+        return <Card.Group items={items}/>
+    }
     renderCards(){
         const {
             managerAddress,
-            title,
             minContribution,
             totalContribution,
             contributors
@@ -37,11 +51,6 @@ class CampaignShowComponent extends Component{
                 meta: 'Address of campaign creator',
                 description: 'The wallet address that deployed the campaign',
                 style: { overflowWrap: 'break-word'}
-            },
-            {
-                header: title,
-                meta: 'Campaign description',
-                description: 'whatever the fuck the manager wants to pay with your money'
             },
             {
                 header: minContribution,
@@ -67,8 +76,15 @@ class CampaignShowComponent extends Component{
     render(){
         return(
             <Layout>
-                <h3>{this.props.title}</h3>
-                {this.renderCards()} 
+                {this.renderHeaderCard()}
+                <Grid>
+                    <Grid.Column width={10}>
+                        {this.renderCards()} 
+                    </Grid.Column>
+                    <Grid.Column width={6}>
+                        <ContributeForm/>
+                    </Grid.Column>
+                </Grid>
             </Layout>
         )
     }
