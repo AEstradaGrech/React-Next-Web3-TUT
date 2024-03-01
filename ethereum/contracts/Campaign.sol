@@ -97,7 +97,7 @@ contract Campaign
     {
         return _description;
     }
-    function getContributors() external view returns(uint){
+    function getContributorsCount() external view returns(uint){
         return _approversCount;
     }
     function getMinimumContribution() external view returns(uint){
@@ -105,7 +105,7 @@ contract Campaign
     }
 
     function getContractBalance() external view returns(uint){
-        return address(this).balance / 1 ether;
+        return address(this).balance;
     }
  
     function getSummary() external view returns(Summary memory)
@@ -115,18 +115,15 @@ contract Campaign
             name: _name,
             description: _description,
             minContribution: _minimumContribution,
-            balance: address(this).balance,         //lo devuelvo en Wei y si eso ya lo paso a eth con web3.utils (para contribuciones muy pequeñas / !redondeo)
+            balance: address(this).balance,         
             contributors: _approversCount
         });
 
         return data;
     }
 
-    function getApproversCount() external view returns(uint){
-        return _approversCount;
-    }
-    function contribute() public payable{
-        require(msg.value / 1 ether >= _minimumContribution);
+    function contribute() public payable {
+        require(msg.value >= _minimumContribution); 
         require(approvers[msg.sender] == 0);
         approvers[msg.sender] = (msg.value / 1 ether);
         _approversCount++;
