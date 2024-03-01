@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { Form, Button, Input, Message } from 'semantic-ui-react';
 import Campaign from '../ethereum/campaign.js';
-import web3 from '../ethereum/web3.js'
+import web3 from '../ethereum/web3.js';
+import { Router } from '../routes.js';
 
 class ContributeFormComponent extends Component {
     
@@ -14,18 +15,30 @@ class ContributeFormComponent extends Component {
     //componentDidMount() -> campaignInstance
     onSubmit = async (event) => {
         event.preventDefault();
+        let bShouldRefresh = false;
         this.setState({loading: true, errorMessage: '', successMessage: ''});
-        try{
-            let campaign = Campaign(this.props.address);
-            let accounts = await web3.eth.getAccounts();
-            await campaign.methods.contribute().send({from: accounts[0], value: web3.utils.toWei(this.state.value, 'ether')});
-            this.setState({loading: false, successMessage: 'Successful contribution' });
-        }
-        catch(error){
-            this.setState({loading: false, errorMessage: error.message });
+        if(this.state.value >= this.props.minContribution)
+        {
+            try{
+                let campaign = Campaign(this.props.address);
+                let accounts = await web3.eth.getAccounts();
+                await campaign.methods.contribute().send({from: accounts[0], value: web3.utils.toWei(this.state.value, 'ether')});
+                this.setState({loading: false, successMessage: 'Successful contribution' });
+                bShouldRefresh = true;
+                
+            }
+            catch(error){
+                this.setState({loading: false, errorMessage: error.message });
+            }
         }
 
-        setTimeout(() => {this.setState({successMessage:'', errorMessage:''})}, 3000);
+        else this.setState({loading: false, errorMessage: 'You are not achieveing the minimum contribution to join this campaign'})
+
+        setTimeout(() => {
+            this.setState({successMessage:'', errorMessage:''})
+            if(bShouldRefresh)
+                Router.replaceRoute(`/campaigns/${this.props.address}`);
+        }, 3500);
     }
     render(){
         return (
