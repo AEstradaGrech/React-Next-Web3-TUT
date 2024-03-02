@@ -65,6 +65,7 @@ contract Campaign
         uint minContribution;
         uint balance;
         uint contributors;
+        uint totalRequests;
     }
 
     string private _name;
@@ -74,6 +75,7 @@ contract Campaign
     uint private _approversCount;
     uint private _minimumContribution;
     mapping(string => Request) public requests;
+    uint private _requestsCount;
 
     constructor (string memory name, string memory description, uint minimum, address mngr)
     {
@@ -107,7 +109,9 @@ contract Campaign
     function getContractBalance() external view returns(uint){
         return address(this).balance;
     }
- 
+    function getRequestsCount() external view returns(uint){
+        return _requestsCount;
+    }
     function getSummary() external view returns(Summary memory)
     {
         Summary memory data  = Summary({
@@ -116,7 +120,8 @@ contract Campaign
             description: _description,
             minContribution: _minimumContribution,
             balance: address(this).balance,         
-            contributors: _approversCount
+            contributors: _approversCount,
+            totalRequests: _requestsCount
         });
 
         return data;
@@ -147,6 +152,8 @@ contract Campaign
         req.approvalsCount=  0;
         req.requiredApprovals = requiredApprovals;
         req.complete= false;
+
+        _requestsCount++;
     }
 
     function voteRequest(string memory reqName, bool isApproval ) external
