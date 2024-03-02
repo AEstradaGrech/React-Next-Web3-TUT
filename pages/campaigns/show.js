@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Card, Grid } from 'semantic-ui-react';
+import { Card, Grid, Button } from 'semantic-ui-react';
 import web3 from '../../ethereum/web3.js'
 import Campaign from '../../ethereum/campaign.js'
 import Layout from '../../components/layout';
 import ContributeForm from '../../components/contributeForm.js'
+import { Link } from '../../routes.js';
 
 class CampaignShowComponent extends Component{
 
@@ -21,7 +22,8 @@ class CampaignShowComponent extends Component{
             description: summary.description, 
             minContribution: web3.utils.fromWei(summary.minContribution, 'ether'),
             totalContribution: web3.utils.fromWei(summary.balance, 'ether'),
-            contributors: parseInt(summary.contributors) 
+            contributors: parseInt(summary.contributors),
+            requests: parseInt(0) 
         }
     }
 
@@ -42,7 +44,8 @@ class CampaignShowComponent extends Component{
             managerAddress,
             minContribution,
             totalContribution,
-            contributors
+            contributors,
+            requests
         } = this.props;
 
         const items = [
@@ -66,6 +69,11 @@ class CampaignShowComponent extends Component{
                 header: contributors,
                 meta: 'Total contributors',
                 description: 'The actual number of contributors who have joined this campaign '
+            },
+            {
+                header: requests,
+                meta: 'Total Requests',
+                description: 'The actual number of funds transfer requests for this campaign '
             }
         ]
 
@@ -80,9 +88,16 @@ class CampaignShowComponent extends Component{
                 <Grid>
                     <Grid.Column width={10}>
                         {this.renderCards()} 
+                        <Link route={`/campaigns/${this.props.address}/requests`}>
+                            <Button
+                                style={{marginLeft:'75px'}}
+                                content="View Requests"
+                                primary/>
+                        </Link>
+                            
                     </Grid.Column>
                     <Grid.Column width={6}>
-                        <ContributeForm/>
+                        <ContributeForm address={this.props.address} minContribution={this.props.minContribution}/>
                     </Grid.Column>
                 </Grid>
             </Layout>
