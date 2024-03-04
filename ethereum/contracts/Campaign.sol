@@ -68,13 +68,19 @@ contract Campaign
         uint totalRequests;
     }
 
+    struct RequestSummary {
+        string name;
+        string description;
+        uint amount;
+    }
+
     string private _name;
     string private _description;
     address private _manager;
     mapping(address => uint) public approvers;
     uint private _approversCount;
     uint private _minimumContribution;
-    string[] private _requests;
+    RequestSummary[] private _requests;
     mapping(string => Request) public requests;
     uint private _requestsCount;
 
@@ -113,7 +119,7 @@ contract Campaign
     function getRequestsCount() external view returns(uint){
         return _requestsCount;
     }
-    function getRequests() external view returns(string[] memory)
+    function getRequests() external view returns(RequestSummary[] memory)
     {
         return _requests;
     }
@@ -159,7 +165,13 @@ contract Campaign
         req.complete= false;
 
         _requestsCount++;
-        _requests.push(name);
+        RequestSummary memory summary = RequestSummary({
+            name: name,
+            description: description,
+            amount: amount
+        });
+
+        _requests.push(summary);
     }
 
     function voteRequest(string memory reqName, bool isApproval ) external

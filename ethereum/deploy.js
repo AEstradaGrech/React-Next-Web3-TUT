@@ -1,4 +1,4 @@
-const version = 'v0.0.8';
+const version = 'v0.0.9';
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const { Web3 } = require('web3');
