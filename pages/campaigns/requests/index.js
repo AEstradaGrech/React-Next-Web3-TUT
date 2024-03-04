@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Card } from 'semantic-ui-react'
 import Campaign from '../../../ethereum/campaign.js'
 import Layout from '../../../components/layout.js';
+import { Link } from '../../../routes.js'
 class RequestsIndex extends Component {
 
     static async getInitialProps(props)
@@ -9,24 +10,22 @@ class RequestsIndex extends Component {
         const campaign = Campaign(props.query.address);
 
         const summary = await campaign.methods.getSummary().call();
-
-        console.log('CAMPAIGN SUMMARY:',summary);
-        return { address: props.query.address }
+        const reqs = await campaign.methods.getRequests().call();
+        console.log('REQS:',reqs);
+        return { 
+            address: props.query.address,
+            requests: reqs
+        }
     }
 
     renderCards(){
-        const items = [
-            {
-                header:'Request 1',
-                description: 'ReqDesc',
+        const items = this.props.requests.map(req => {
+            return {
+                header: req,
+                description: <Link route={`/campaigns/${this.props.address}/requests/${req}`}>View Details</Link>,
                 fluid: true
-            },
-            {
-                header: 'Request 2',
-                description: 'Req2Desc',
-                fluid:true
             }
-        ]
+        });
 
         return <Card.Group items={items}/>
     }

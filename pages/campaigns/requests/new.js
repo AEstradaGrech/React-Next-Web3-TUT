@@ -18,7 +18,9 @@ class NewRequestComponent extends Component {
 
     render(){
         return(
-            <h1>New Req</h1>
+            <Layout>
+                <h3>New Request</h3>
+            </Layout>
         )
     }
 }

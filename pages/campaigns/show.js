@@ -14,6 +14,7 @@ class CampaignShowComponent extends Component{
         const campaign = Campaign(props.query.address);
 
         const summary = await campaign.methods.getSummary().call();
+       
         console.log(summary);
         return{
             address: props.query.address,
@@ -23,7 +24,7 @@ class CampaignShowComponent extends Component{
             minContribution: web3.utils.fromWei(summary.minContribution, 'ether'),
             totalContribution: web3.utils.fromWei(summary.balance, 'ether'),
             contributors: parseInt(summary.contributors),
-            requests: parseInt(0) 
+            requests: parseInt(summary.totalRequests)
         }
     }
 
