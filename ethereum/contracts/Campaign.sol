@@ -74,6 +74,7 @@ contract Campaign
     mapping(address => uint) public approvers;
     uint private _approversCount;
     uint private _minimumContribution;
+    string[] private _requests;
     mapping(string => Request) public requests;
     uint private _requestsCount;
 
@@ -112,6 +113,10 @@ contract Campaign
     function getRequestsCount() external view returns(uint){
         return _requestsCount;
     }
+    function getRequests() external view returns(string[] memory)
+    {
+        return _requests;
+    }
     function getSummary() external view returns(Summary memory)
     {
         Summary memory data  = Summary({
@@ -130,7 +135,7 @@ contract Campaign
     function contribute() public payable {
         require(msg.value >= _minimumContribution); 
         require(approvers[msg.sender] == 0);
-        approvers[msg.sender] = (msg.value / 1 ether);
+        approvers[msg.sender] = (msg.value);
         _approversCount++;
 
     }
@@ -140,7 +145,7 @@ contract Campaign
         require(bytes(name).length > 0);
         require(bytes(description).length > 0);
         require(amount > 0);
-        require(amount <= address(this).balance / 1 ether);
+        require(amount <= address(this).balance);
         require(requiredApprovals > 0);
         require(requiredApprovals <= _approversCount);
         Request storage req = requests[name];
@@ -154,6 +159,7 @@ contract Campaign
         req.complete= false;
 
         _requestsCount++;
+        _requests.push(name);
     }
 
     function voteRequest(string memory reqName, bool isApproval ) external
@@ -181,7 +187,6 @@ contract Campaign
         if(req.approvalsCount >= req.requiredApprovals) {
             req.canSubmit = true;
         }
-        //check reqNotComplete
     }
 
     function submitRequest(string memory reqName) restricted external {
@@ -189,8 +194,8 @@ contract Campaign
         require(bytes(req.name).length > 0);
         require(bytes(req.name).length == bytes(reqName).length);
         require(req.canSubmit && !req.complete);
-        require(address(this).balance / 1 ether >= req.amount);
-        req.receiver.transfer(req.amount * 1 ether);
+        require(address(this).balance >= req.amount);
+        req.receiver.transfer(req.amount);
 
         req.complete = true;
     }
