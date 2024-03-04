@@ -5,7 +5,7 @@ import web3 from '../../ethereum/web3.js'
 import { Form, Button, Input, Message } from 'semantic-ui-react'
 import { Link, Router } from '../../routes.js'
 
-class NewCampaignComponent extends Component
+class NewCampaign extends Component
 {
     state = {
         campaignName: '',
@@ -104,4 +104,4 @@ class NewCampaignComponent extends Component
     }
 }
 
-export default NewCampaignComponent;
+export default NewCampaign;

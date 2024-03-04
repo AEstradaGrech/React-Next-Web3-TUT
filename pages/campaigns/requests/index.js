@@ -8,21 +8,20 @@ class RequestsIndex extends Component {
     static async getInitialProps(props)
     {
         const campaign = Campaign(props.query.address);
-
-        const summary = await campaign.methods.getSummary().call();
         const reqs = await campaign.methods.getRequests().call();
         console.log('REQS:',reqs);
         return { 
             address: props.query.address,
-            requests: reqs
+            requests: reqs ?? []
         }
     }
 
     renderCards(){
         const items = this.props.requests.map(req => {
             return {
-                header: req,
-                description: <Link route={`/campaigns/${this.props.address}/requests/${req}`}>View Details</Link>,
+                header: req.name,
+                meta: req.description,
+                description: <Link route={`/campaigns/${this.props.address}/requests/${req.name}`}>View Details</Link>,
                 fluid: true
             }
         });

@@ -7,19 +7,17 @@ class RequestDetail extends Component{
     {
         const contract = Campaign(props.query.address);
         const request = await contract.methods.requests(props.query.request).call();
-
-        console.log('REQ SUMMARY :: ', request);
         return { 
             address: props.query.address, 
             requestName: props.query.request,
-            request: request
+            description: request.description
         }
     }
     render(){
         return(
             <Layout>
                 <h3>{this.props.requestName}</h3>
-                <h4>{this.props.request.description}</h4>
+                <h5>{this.props.description}</h5>
             </Layout>
         )
     }

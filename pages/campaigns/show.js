@@ -6,7 +6,7 @@ import Layout from '../../components/layout';
 import ContributeForm from '../../components/contributeForm.js'
 import { Link } from '../../routes.js';
 
-class CampaignShowComponent extends Component{
+class CampaignShow extends Component{
 
     static async getInitialProps(props) //<-- este props object NO es el mismo que se devuelve, es por haber hecho toda la movida de los routes
     {
@@ -106,4 +106,4 @@ class CampaignShowComponent extends Component{
     }
 }
 
-export default CampaignShowComponent;
+export default CampaignShow;
