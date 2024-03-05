@@ -2,8 +2,12 @@ import React, { Component } from 'react';
 import { Form, Button, Message, Input } from 'semantic-ui-react';
 import Layout from '../../../components/layout.js';
 import Campaign from '../../../ethereum/campaign.js'
+import web3 from '../../../ethereum/web3.js'
 
 class NewRequest extends Component {
+    static async getInitialProps(props){
+        return { address: props.query.address}
+    }
     state = {
         name: '',
         description:'',
@@ -17,6 +21,62 @@ class NewRequest extends Component {
 
     onSubmit = async event => {
         event.preventDefault()
+        this.setState({loading:true, errorMessage: '', successMessage: ''})
+        let isValidInput = this.validateInput();
+
+        if(isValidInput)
+        {
+            try{
+                const contract = Campaign(this.props.address);
+                let accounts = await web3.eth.getAccounts();
+                await contract.methods.triggerCampaignRequest(this.state.name, this.state.description, web3.utils.toWei(this.state.amount, 'ether'), this.state.requiredVotes, this.state.recipient)
+                                      .send({from: accounts[0]});
+                this.setState({loading: false, successMessage: `Request: ${this.state.name} successfully triggered`});
+            }catch(error){
+                this.setState({loading: false, errorMessage: error.message})
+            }
+        }
+
+        else this.setState({loading: false})
+
+        this.handleErrorFadeOut();
+    }
+
+    validateInput() {
+        if(this.state.name.length <= 4){
+            this.setState({errorMessage: 'A Request must have a name with at least 4 characters'});
+            return false;
+        }
+        if(this.state.description.length > 100){
+            this.setState({errorMessage: 'Request description is too long. It must be shorter than 100 characters'});
+            return false;
+        }
+        if(this.state.description.length < 10){
+            this.setState({errorMessage: 'Request description must be larger than 10 characters'});
+            return false;
+        }
+        if(this.state.amount <= 0){
+            this.setState({errorMessage: 'Request amount must be greater than 0'});
+            return false;
+        }
+        if(!parseFloat(this.state.amount)){
+            this.setState({errorMessage: 'Amount value must be an integer or a decimal number'});
+            return false
+        }
+        if(this.state.requiredVotes <= 0){
+            this.setState({errorMessage: 'A Request needs at least one approval to be submited'})
+            return false;
+        }
+        if(this.state.recipient.length !== 42){
+            this.setState({errorMessage: 'The input value for the recipient is not a valid wallet address'});
+            return false;
+        }
+        return true;
+    }
+    handleErrorFadeOut = () => {
+        setTimeout(() => {
+            this.setState({errorMessage: '', successMessage: ''});
+        }, 5000)
     }
 
     render(){

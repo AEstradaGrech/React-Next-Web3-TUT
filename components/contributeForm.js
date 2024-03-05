@@ -32,7 +32,7 @@ class ContributeFormComponent extends Component {
             }
         }
 
-        else this.setState({loading: false, errorMessage: 'You are not achieveing the minimum contribution to join this campaign'})
+        else this.setState({loading: false, errorMessage: 'You are not reaching the minimum contribution to join this campaign'})
 
         setTimeout(() => {
             this.setState({successMessage:'', errorMessage:''})
