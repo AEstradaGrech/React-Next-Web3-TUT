@@ -10,7 +10,6 @@ class CampaignShow extends Component{
 
     static async getInitialProps(props) //<-- este props object NO es el mismo que se devuelve, es por haber hecho toda la movida de los routes
     {
-        console.log(':: ATTEMPTING TO CREATE INSTANCE OF CAMPAIGN FOR ADDRESS --> ',props.query.address);
         const campaign = Campaign(props.query.address);
 
         const summary = await campaign.methods.getSummary().call();
@@ -91,7 +90,7 @@ class CampaignShow extends Component{
                         {this.renderCards()} 
                         <Link route={`/campaigns/${this.props.address}/requests`}>
                             <Button
-                                style={{marginLeft:'75px'}}
+                                style={{marginLeft:'75px', marginTop: '10px'}}
                                 content="View Requests"
                                 primary/>
                         </Link>

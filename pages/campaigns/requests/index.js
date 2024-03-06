@@ -1,18 +1,33 @@
 import React, { Component } from 'react';
-import { Card } from 'semantic-ui-react'
+import { Card, Table, Button } from 'semantic-ui-react'
 import Campaign from '../../../ethereum/campaign.js'
 import Layout from '../../../components/layout.js';
 import { Link } from '../../../routes.js'
+import web3 from '../../../ethereum/web3.js'
+import RequestRowComponent from '../../../components/requestRow.js';
+
 class RequestsIndex extends Component {
 
     static async getInitialProps(props)
     {
+        const accounts = await web3.eth.getAccounts();
+
         const campaign = Campaign(props.query.address);
+        let manager = await campaign.methods.getManager().call()
         const reqs = await campaign.methods.getRequests().call();
-        console.log('REQS:',reqs);
+        const requests = await Promise.all(
+            Array(reqs.length).fill().map((element, index) => {
+                console.log('element: ', element);
+                console.log('idx', index);
+                return campaign.methods.requests(reqs[index].name).call();
+            })
+        )
+        console.log(requests);
         return { 
             address: props.query.address,
-            requests: reqs ?? []
+            connectedAccount: accounts[0],
+            campaignManager: manager,
+            requests: requests
         }
     }
 
@@ -28,11 +43,45 @@ class RequestsIndex extends Component {
 
         return <Card.Group items={items}/>
     }
+    renderTableRows(){
+        return this.props.requests.map((req, idx) => {
+            console.log(req);
+            return <RequestRowComponent
+                    key={idx}
+                    address={this.props.address}
+                    connectedAccount={this.props.connectedAccount}
+                    campaignManager={this.props.campaignManager}
+                    request={req}/>
+        })
+    }
     render(){
+        const { Header, Row, HeaderCell, Body, Cell } = Table;
         return(
             <Layout>
-                <h3>Active Requests</h3>
-                {this.renderCards()}
+                <h3>Campaign Requests</h3>
+                <Link route={`/campaigns/${this.props.address}/requests/new`}>
+                    <Button
+                        floated='right'
+                        style={{marginBotton: '10px'}}
+                        primary
+                        content="Add Request"
+                        icon="add circle"/>
+                </Link>
+                <Table>
+                    <Header>
+                        <Row>
+                            <HeaderCell>Name</HeaderCell>
+                            <HeaderCell>Description</HeaderCell>
+                            <HeaderCell>Amount (eth)</HeaderCell>
+                            <HeaderCell>Approvals</HeaderCell>
+                            <HeaderCell>Vote</HeaderCell>
+                            <HeaderCell>Finalize</HeaderCell>
+                        </Row>
+                    </Header>
+                    <Body>
+                        {this.renderTableRows()}
+                    </Body>
+                </Table>
             </Layout>
             
         )
