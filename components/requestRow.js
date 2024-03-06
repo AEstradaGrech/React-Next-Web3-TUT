@@ -16,7 +16,7 @@ class RequestRowComponent extends Component{
             Router.replaceRoute(`/campaigns/${this.props.address}/requests`);
             
         }catch(error){
-
+            this.props.onError(error.message);
         }
     }
     canFinalize(){

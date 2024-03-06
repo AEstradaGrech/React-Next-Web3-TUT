@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Table, Button } from 'semantic-ui-react'
+import { Card, Table, Button, Message } from 'semantic-ui-react'
 import Campaign from '../../../ethereum/campaign.js'
 import Layout from '../../../components/layout.js';
 import { Link } from '../../../routes.js'
@@ -8,6 +8,9 @@ import RequestRowComponent from '../../../components/requestRow.js';
 
 class RequestsIndex extends Component {
 
+    state = {
+        errorMessage:''
+    }
     static async getInitialProps(props)
     {
         const accounts = await web3.eth.getAccounts();
@@ -31,6 +34,11 @@ class RequestsIndex extends Component {
         }
     }
 
+    handleErrorMessage = (message) => {
+        this.setState({errorMessage: message})
+        setTimeout(() => {this.setState({errorMessage: ''})}, 5000)
+    }
+
     renderCards(){
         const items = this.props.requests.map(req => {
             return {
@@ -51,7 +59,8 @@ class RequestsIndex extends Component {
                     address={this.props.address}
                     connectedAccount={this.props.connectedAccount}
                     campaignManager={this.props.campaignManager}
-                    request={req}/>
+                    request={req}
+                    onError={this.handleErrorMessage}/>
         })
     }
     render(){
@@ -67,6 +76,11 @@ class RequestsIndex extends Component {
                         content="Add Request"
                         icon="add circle"/>
                 </Link>
+                {
+                    this.state.errorMessage === '' ? null :
+                    <Message error header='Oops!' content={this.state.errorMessage}/>
+                }
+                
                 <Table>
                     <Header>
                         <Row>
