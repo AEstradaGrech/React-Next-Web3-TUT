@@ -84,13 +84,14 @@ class RequestsIndex extends Component {
                     <Message error header='Oops!' content={this.state.errorMessage}/>
                 }
                 
-                <Table>
+                <Table style={{textAlign:'center'}}>
                     <Header>
                         <Row>
                             <HeaderCell>Name</HeaderCell>
                             <HeaderCell>Description</HeaderCell>
                             <HeaderCell>Amount (eth)</HeaderCell>
                             <HeaderCell>Approvals</HeaderCell>
+                            <HeaderCell>Claims</HeaderCell>
                             <HeaderCell>Vote</HeaderCell>
                             <HeaderCell>Finalize</HeaderCell>
                         </Row>
