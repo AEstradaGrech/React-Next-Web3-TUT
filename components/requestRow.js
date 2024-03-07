@@ -6,11 +6,14 @@ import { Router } from '../routes.js'
 
 class RequestRowComponent extends Component{
 
+    state = {
+        loadingFinalize:false,
+        loadingApprove: false
+    }
     onApprove = async () => {
-        console.log(this.props.connectedAccount)
         if(this.props.request.complete) return;
         const campaign = Campaign(this.props.address);
-        console.log(campaign)
+        this.setState({loadingApprove: true});
         try{
             await campaign.methods.voteRequest(this.props.request.name, true).send({from: this.props.connectedAccount});
             Router.replaceRoute(`/campaigns/${this.props.address}/requests`);
@@ -18,6 +21,20 @@ class RequestRowComponent extends Component{
         }catch(error){
             this.props.onError(error.message);
         }
+        this.setState({loadingApprove: false});
+    }
+    onFinalize = async () =>{
+        if(!this.props.request.canSubmit) return;
+        const campaign = Campaign(this.props.address);
+        this.setState({loadingFinalize:true});
+        try{
+            await campaign.methods.submitRequest(this.props.request.name)
+                .send({from: this.props.connectedAccount});
+            Router.replaceRoute(`/campaigns/${this.props.address}/requests`);
+        }catch(error){
+            this.props.onError(error.message);
+        }
+        this.setState({loadingFinalize:false});
     }
     canFinalize(){
         return this.props.request.canSubmit && this.props.connectedAccount === this.props.campaignManager;
@@ -30,10 +47,20 @@ class RequestRowComponent extends Component{
                 <Cell>{this.props.request.description}</Cell>
                 <Cell>{web3.utils.fromWei(this.props.request.amount, 'ether')}</Cell>
                 <Cell> {parseInt(this.props.request.approvalsCount)} / {parseInt(this.props.request.requiredApprovals)}</Cell>
-                <Cell> <Button color={this.props.request.complete ? 'red' : this.props.request.canSubmit ? 'orange' : 'green'} basic onClick={this.onApprove}>Approve</Button></Cell>
+                <Cell> 
+                    <Button disabled={this.props.connectedAccount === this.props.campaignManager} 
+                            color={this.props.request.complete ? 'red' : this.props.request.canSubmit ? 'orange' : 'green'} 
+                            loading={this.state.loadingApprove}
+                            basic 
+                            onClick={this.onApprove}>Approve
+                    </Button>
+                </Cell>
                 <Cell> 
                     { this.props.request.complete ? null :
-                        <Button disabled={!this.canFinalize() || !this.props.request.canSubmit} color={this.canFinalize() ? 'green' : 'grey'} basic onClick={this.onApprove}>Finalize</Button>
+                        <Button disabled={!this.canFinalize() || !this.props.request.canSubmit} color={this.canFinalize() ? 'green' : 'grey'} 
+                                loading={this.state.loadingFinalize}
+                                basic 
+                                onClick={this.onFinalize}>Finalize</Button>
                     }
                 </Cell>
             </Row>
