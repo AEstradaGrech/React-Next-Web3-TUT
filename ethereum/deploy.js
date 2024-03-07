@@ -1,4 +1,4 @@
-const version = 'v0.0.10';
+const version = 'v0.0.11';
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const { Web3 } = require('web3');
@@ -20,7 +20,7 @@ const deploy = async () => {
     console.log('Deploying contract from address: ', accounts[0]);
     let contract = await new web3.eth.Contract(abi)
         .deploy({data: evm.bytecode.object})
-        .send({from: accounts[0], gas: '3000000'});
+        .send({from: accounts[0], gas: '4000000'});
     console.log(JSON.stringify(abi));
     fs.outputJSONSync(path.resolve(__dirname,'builds', `campaignsFactory-${version}-deploy.json`), { creator: accounts[0] , address: contract.options.address, abi: abi });
     console.log('Contract deployed to address: ', contract.options.address );

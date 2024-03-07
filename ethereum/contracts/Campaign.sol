@@ -53,9 +53,11 @@ contract Campaign
         address payable receiver;
         uint approvalsCount;
         uint requiredApprovals;
+        uint claimsCount;
         bool canSubmit;
         bool complete;
         mapping(address => bool) approvers;
+        RequestClaim[] claims;
     }
 
     struct Summary {
@@ -72,6 +74,11 @@ contract Campaign
         string name;
         string description;
         uint amount;
+    }
+
+    struct RequestClaim{
+        address contributor;
+        string description;
     }
 
     string private _name;
@@ -123,6 +130,7 @@ contract Campaign
     {
         return _requests;
     }
+    
     function getSummary() external view returns(Summary memory)
     {
         Summary memory data  = Summary({
@@ -165,8 +173,10 @@ contract Campaign
         req.amount = amount;
         req.receiver = receiver;
         req.approvalsCount=  0;
+        req.claimsCount = 0;
         req.requiredApprovals = requiredApprovals;
         req.complete= false;
+        req.claims;
 
         _requestsCount++;
         RequestSummary memory summary = RequestSummary({
@@ -216,6 +226,27 @@ contract Campaign
         req.complete = true;
     }
 
+    function claimRequest(string memory reqName, string memory description) external
+    {
+        require(approvers[msg.sender] > 0);
+        require(bytes(requests[reqName].name).length != 0);
+        RequestClaim memory claim = RequestClaim({
+            contributor: msg.sender,
+            description: description
+        });
+
+        requests[reqName].claims.push(claim);
+        requests[reqName].claimsCount++;
+    }
+
+    function getRequestClaims(string memory reqName) external view returns(RequestClaim[] memory)
+    {
+        require(bytes(requests[reqName].name).length != 0);
+
+        return requests[reqName].claims;
+    }
+
+//TODO: cancelCampaign --> return funds to contributors
     modifier restricted() {
         require(msg.sender == _manager);
         _;
