@@ -1,18 +1,22 @@
 import React, { Component } from 'react';
-import { Form, Button, Message, Input } from 'semantic-ui-react';
+import { Form, Button, Message, Input, Checkbox } from 'semantic-ui-react';
 import Layout from '../../../components/layout.js';
 import Campaign from '../../../ethereum/campaign.js'
 import web3 from '../../../ethereum/web3.js'
 
 class NewRequest extends Component {
     static async getInitialProps(props){
-        return { address: props.query.address}
+        const campaign = Campaign(props.query.address);
+        let contributors = await campaign.methods.getContributorsCount().call();
+        console.log('contribs: ', contributors);
+        return { address: props.query.address, totalContributors: contributors}
     }
     state = {
         name: '',
         description:'',
         amount: '',
         requiredVotes: '',
+        requiresAllContributors: false,
         recipient:'',
         errorMessage: '',
         successMessage: '',
@@ -26,10 +30,18 @@ class NewRequest extends Component {
 
         if(isValidInput)
         {
+            console.log('state: ',this.state);
             try{
                 const contract = Campaign(this.props.address);
                 let accounts = await web3.eth.getAccounts();
-                await contract.methods.triggerCampaignRequest(this.state.name, this.state.description, web3.utils.toWei(this.state.amount, 'ether'), this.state.requiredVotes, this.state.recipient)
+                let approvals = this.state.requiresAllContributors ? this.props.totalContributors : this.state.requiredVotes;
+                console.log(approvals);
+                await contract.methods.triggerCampaignRequest(
+                                        this.state.name, 
+                                        this.state.description, 
+                                        web3.utils.toWei(this.state.amount, 'ether'), 
+                                        approvals,
+                                        this.state.recipient)
                                       .send({from: accounts[0]});
                 this.setState({loading: false, successMessage: `Request: ${this.state.name} successfully triggered`});
             }catch(error){
@@ -63,7 +75,7 @@ class NewRequest extends Component {
             this.setState({errorMessage: 'Amount value must be an integer or a decimal number'});
             return false
         }
-        if(this.state.requiredVotes <= 0){
+        if(!this.state.requiresAllContributors && this.state.requiredVotes <= 0){
             this.setState({errorMessage: 'A Request needs at least one approval to be submited'})
             return false;
         }
@@ -108,10 +120,17 @@ class NewRequest extends Component {
                     <label>Required Approvals</label>
                     <Form.Field>
                         <Input 
+                            disabled={this.state.requiresAllContributors}
                             value={this.state.requiredVotes}
                             onChange={event => this.setState({requiredVotes: event.target.value })}
                             />
+                            
+                            <Checkbox toggle
+                                      label='All contributors'
+                                      onChange={() => this.setState({requiresAllContributors: !this.state.requiresAllContributors})}
+                                      style={{marginTop: '7px'}}/>
                     </Form.Field>
+                    
                     <label>Recipient</label>
                     <Form.Field>
                         <Input 

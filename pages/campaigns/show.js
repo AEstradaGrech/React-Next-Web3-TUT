@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Card, Grid, Button } from 'semantic-ui-react';
-import web3 from '../../ethereum/web3.js'
-import Campaign from '../../ethereum/campaign.js'
+import web3 from '../../ethereum/web3.js';
+import Campaign from '../../ethereum/campaign.js';
 import Layout from '../../components/layout';
-import ContributeForm from '../../components/contributeForm.js'
+import ContributeForm from '../../components/contributeForm.js';
+import AddFundsForm from '../../components/addFundsForm.js';
 import { Link } from '../../routes.js';
 
 class CampaignShow extends Component{
@@ -14,10 +15,11 @@ class CampaignShow extends Component{
 
         const summary = await campaign.methods.getSummary().call();
        
-        console.log(summary);
+        const accounts = await web3.eth.getAccounts();
         return{
             address: props.query.address,
             managerAddress: summary.manager,
+            connectedAccount: accounts[0],
             title: summary.name,
             description: summary.description, 
             minContribution: web3.utils.fromWei(summary.minContribution, 'ether'),
@@ -62,7 +64,7 @@ class CampaignShow extends Component{
             },
             {
                 header: totalContribution,
-                meta: 'Total contribution (ETH)',
+                meta: 'Total funds (ETH)',
                 description: 'The actual amount of ETH available for this campaign'
             },
             {
@@ -97,7 +99,10 @@ class CampaignShow extends Component{
                             
                     </Grid.Column>
                     <Grid.Column width={6}>
-                        <ContributeForm address={this.props.address} minContribution={this.props.minContribution}/>
+                        { this.props.connectedAccount === this.props.managerAddress ? 
+                            <AddFundsForm address={this.props.address} /> :
+                            <ContributeForm address={this.props.address} minContribution={this.props.minContribution}/>
+                        }
                     </Grid.Column>
                 </Grid>
             </Layout>
