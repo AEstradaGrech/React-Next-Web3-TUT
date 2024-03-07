@@ -146,6 +146,10 @@ contract Campaign
 
     }
 
+    function addFunds() restricted external payable{
+        
+    }
+
     function triggerCampaignRequest(string memory name, string memory description, uint amount, uint requiredApprovals, address payable receiver) restricted external {
         
         require(bytes(name).length > 0);
