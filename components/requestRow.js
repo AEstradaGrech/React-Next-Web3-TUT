@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Table, Button, Message } from 'semantic-ui-react';
 import Campaign from '../ethereum/campaign.js';
 import web3 from '../ethereum/web3.js';
-import { Router } from '../routes.js'
+import { Router, Link } from '../routes.js'
 
 class RequestRowComponent extends Component{
 
@@ -43,7 +43,11 @@ class RequestRowComponent extends Component{
         const { Row, Cell } = Table;
         return(
             <Row disabled={this.props.request.complete}>
-                <Cell ><b>{this.props.request.name}</b></Cell>
+                <Cell >
+                    <Link route={`/campaigns/${this.props.address}/requests/${this.props.request.name}`}>
+                        <b>{this.props.request.name}</b>
+                    </Link>
+                </Cell>
                 <Cell>{this.props.request.description}</Cell>
                 <Cell>{web3.utils.fromWei(this.props.request.amount, 'ether')}</Cell>
                 <Cell> {parseInt(this.props.request.approvalsCount)} / {parseInt(this.props.request.requiredApprovals)}</Cell>

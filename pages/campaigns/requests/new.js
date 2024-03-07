@@ -3,6 +3,7 @@ import { Form, Button, Message, Input, Checkbox } from 'semantic-ui-react';
 import Layout from '../../../components/layout.js';
 import Campaign from '../../../ethereum/campaign.js'
 import web3 from '../../../ethereum/web3.js'
+import { Link } from '../../../routes.js';
 
 class NewRequest extends Component {
     static async getInitialProps(props){
@@ -94,6 +95,9 @@ class NewRequest extends Component {
     render(){
         return(
             <Layout>
+                <Link route={`/campaigns/${this.props.address}/requests`} >
+                    {'<<'} Back
+                </Link>
                 <h3>New Request</h3>
                 <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage} success={!!this.state.successMessage}>
                     <label>Name</label>
@@ -112,7 +116,9 @@ class NewRequest extends Component {
                     </Form.Field>
                     <label>Amount</label>
                     <Form.Field>
-                        <Input 
+                        <Input
+                            label='ETH'
+                            labelPosition='right' 
                             value={this.state.amount}
                             onChange={event => this.setState({amount: event.target.value })}
                             />

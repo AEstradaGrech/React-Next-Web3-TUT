@@ -68,7 +68,7 @@ class RequestsIndex extends Component {
         return(
             <Layout>
                 <Link route={`/campaigns/${this.props.address}`} >
-                    Back
+                    {'<<'} Back
                 </Link>
                 <h3>Campaign Requests</h3>
                 <Link route={`/campaigns/${this.props.address}/requests/new`}>
