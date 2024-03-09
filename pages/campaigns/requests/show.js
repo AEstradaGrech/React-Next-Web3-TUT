@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import Layout from '../../../components/layout';
 import Campaign from '../../../ethereum/campaign.js';
 import { Link } from '../../../routes.js';
-import { Grid, Card, CardGroup } from 'semantic-ui-react';
+import { Grid, Card, Table } from 'semantic-ui-react';
 import web3 from '../../../ethereum/web3.js'
 import RequestClaimComponent from '../../../components/requestClaimForm.js';
-import { redirect } from 'next/dist/server/api-utils/index.js';
+
 
 class RequestDetail extends Component{
     static async getInitialProps(props)
@@ -13,6 +13,8 @@ class RequestDetail extends Component{
         const contract = Campaign(props.query.address);
         const request = await contract.methods.requests(props.query.request).call();
         const claims = await contract.methods.getRequestClaims(request.name).call();
+        const accounts = await web3.eth.getAccounts();
+        const manager = await contract.methods.getManager().call();
         console.log(':: REQ CLAIMS --> ', claims);
         return { 
             address: props.query.address, 
@@ -25,7 +27,9 @@ class RequestDetail extends Component{
             totalClaims: parseInt(request.claimsCount),
             claims: claims,
             isRejected: request.rejected,
-            rejectionReason: request.rejectReason
+            rejectionReason: request.rejectReason,
+            connectedAccount: accounts[0],
+            managerAddress: manager
         }
     }
     renderHeaderCard() {
@@ -103,7 +107,11 @@ class RequestDetail extends Component{
                         {this.renderCards()}
                     </Grid.Column>
                     <Grid.Column width={5}>
-                        <RequestClaimComponent />
+                        <RequestClaimComponent 
+                            reqName={this.props.requestName} 
+                            address={this.props.address}
+                            connectedAccount={this.props.connectedAccount} 
+                            isManagerForm={this.props.connectedAccount === this.props.managerAddress}/>
                     </Grid.Column>
                 </Grid>
                 {
