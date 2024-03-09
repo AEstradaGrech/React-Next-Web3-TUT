@@ -53,9 +53,12 @@ contract Campaign
         address payable receiver;
         uint approvalsCount;
         uint requiredApprovals;
+        uint rejectionsCount;
         uint claimsCount;
         bool canSubmit;
         bool complete;
+        bool rejected;
+        string rejectReason;
         mapping(address => bool) approvers;
         RequestClaim[] claims;
     }
@@ -68,6 +71,7 @@ contract Campaign
         uint balance;
         uint contributors;
         uint totalRequests;
+        bool isCancelled;
     }
 
     struct RequestSummary {
@@ -90,7 +94,7 @@ contract Campaign
     RequestSummary[] private _requests;
     mapping(string => Request) public requests;
     uint private _requestsCount;
-
+    bool private _cancelled;
     constructor (string memory name, string memory description, uint minimum, address mngr)
     {
         require(minimum > 0);
@@ -140,13 +144,15 @@ contract Campaign
             minContribution: _minimumContribution,
             balance: address(this).balance,         
             contributors: _approversCount,
-            totalRequests: _requestsCount
+            totalRequests: _requestsCount,
+            isCancelled: _cancelled
         });
 
         return data;
     }
 
     function contribute() public payable {
+        require(!_cancelled);
         require(msg.value >= _minimumContribution); 
         require(approvers[msg.sender] == 0);
         approvers[msg.sender] = (msg.value);
@@ -159,7 +165,7 @@ contract Campaign
     }
 
     function triggerCampaignRequest(string memory name, string memory description, uint amount, uint requiredApprovals, address payable receiver) restricted external {
-        
+        require(!_cancelled);
         require(bytes(name).length > 0);
         require(bytes(description).length > 0);
         require(amount > 0);
@@ -175,8 +181,8 @@ contract Campaign
         req.approvalsCount=  0;
         req.claimsCount = 0;
         req.requiredApprovals = requiredApprovals;
-        req.complete= false;
-        req.claims;
+        req.complete = false;
+        req.rejected = false;
 
         _requestsCount++;
         RequestSummary memory summary = RequestSummary({
@@ -188,48 +194,59 @@ contract Campaign
         _requests.push(summary);
     }
 
-    function voteRequest(string memory reqName, bool isApproval ) external
+    function voteRequest(string memory reqName, bool isApproval ) external forContributors
     {
+        require(!_cancelled);
         require(msg.sender != _manager);
 
         Request storage req = requests[reqName];
 
         require(bytes(req.name).length > 0);
         require(bytes(req.name).length == bytes(reqName).length);
-        //check isApprover
-        require(approvers[msg.sender] > 0);
+    
         //check notVoted
         require(!req.canSubmit);
         require(!req.complete);
-        //check reqExists
+        require(!req.rejected);
+        //check this fellow has not voted
         require(!req.approvers[msg.sender]);
-
+        // this fellow has voted
         req.approvers[msg.sender] = true;
-        
+        // a fellow might vote y/n
         if(isApproval){
             req.approvalsCount++;
+        }
+        else {
+            req.rejectionsCount++;
         }
 
         if(req.approvalsCount >= req.requiredApprovals) {
             req.canSubmit = true;
         }
+        if(req.rejectionsCount >= _approversCount){
+            req.rejected = true;
+            req.rejectReason = "All the contributors have voted for rejection";
+        }
     }
 
     function submitRequest(string memory reqName) restricted external {
+        require(!_cancelled);
         Request storage req = requests[reqName];
         require(bytes(req.name).length > 0);
         require(bytes(req.name).length == bytes(reqName).length);
-        require(req.canSubmit && !req.complete);
+        require(req.canSubmit && !req.complete && !req.rejected);
         require(address(this).balance >= req.amount);
         req.receiver.transfer(req.amount);
 
         req.complete = true;
     }
 
-    function claimRequest(string memory reqName, string memory description) external
+    function claimRequest(string memory reqName, string memory description) external forContributors
     {
+        require(!_cancelled);
         require(approvers[msg.sender] > 0);
         require(bytes(requests[reqName].name).length != 0);
+        require(!requests[reqName].rejected && !requests[reqName].complete);
         RequestClaim memory claim = RequestClaim({
             contributor: msg.sender,
             description: description
@@ -246,9 +263,34 @@ contract Campaign
         return requests[reqName].claims;
     }
 
-//TODO: cancelCampaign --> return funds to contributors
+    //deberia ser payable y que el manager añada algo de ether para el gas de la devolucion. 
+    // cantidad baja. el resto con 'addFunds()'
+    function rejectRequest(string memory reqName, string memory reason) external restricted {
+        require(bytes(reason).length > 0);
+        require(bytes(requests[reqName].name).length > 0);
+        require(!requests[reqName].rejected);
+        requests[reqName].rejected = true;
+        requests[reqName].rejectReason = reason;
+    }
+    function cancelCampaign() external restricted {
+        _cancelled = true;
+    }
+
+
+    function claimFunds() external forContributors {
+        require(_cancelled);
+        payable(msg.sender).transfer(approvers[msg.sender]);
+        approvers[msg.sender] = 0;
+        _approversCount--;
+
+    }
     modifier restricted() {
         require(msg.sender == _manager);
+        _;
+    }
+
+    modifier forContributors() {
+        require(approvers[msg.sender] != 0);
         _;
     }
 }
