@@ -20,12 +20,9 @@ class RequestsIndex extends Component {
         const reqs = await campaign.methods.getRequests().call();
         const requests = await Promise.all(
             Array(reqs.length).fill().map((element, index) => {
-                console.log('element: ', element);
-                console.log('idx', index);
                 return campaign.methods.requests(reqs[index].name).call();
             })
         )
-        console.log(requests);
         return { 
             address: props.query.address,
             connectedAccount: accounts[0],

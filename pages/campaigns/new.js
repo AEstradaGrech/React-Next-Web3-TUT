@@ -49,8 +49,8 @@ class NewCampaign extends Component
             this.setState({errorMessage: 'A Campaign must have a name with at least 4 characters'});
             return false;
         }
-        if(this.state.description.length > 100){
-            this.setState({errorMessage: 'Campaign description is too long. It must be shorter than 100 characters'});
+        if(this.state.description.length > 250){
+            this.setState({errorMessage: 'Campaign description is too long. It must be shorter than 250 characters'});
             return false;
         }
         if(this.state.description.length < 10){
