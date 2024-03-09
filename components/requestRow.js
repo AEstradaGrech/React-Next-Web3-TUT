@@ -51,7 +51,12 @@ class RequestRowComponent extends Component{
                 <Cell>{this.props.request.description}</Cell>
                 <Cell>{web3.utils.fromWei(this.props.request.amount, 'ether')}</Cell>
                 <Cell> {parseInt(this.props.request.approvalsCount)} / {parseInt(this.props.request.requiredApprovals)}</Cell>
-                <Cell style={{color:'red', fontWeight:600}}>{0}</Cell>
+                <Cell style={
+                    {
+                        color: this.props.request.claimsCount > 0 ? 'red' : '#000000de', 
+                        fontWeight:this.props.request.claimsCount > 0 ? 600 : 0
+                    }
+                }>{parseInt(this.props.request.claimsCount)}</Cell>
                 <Cell> 
                     <Button disabled={this.props.connectedAccount === this.props.campaignManager} 
                             color={this.props.request.complete ? 'red' : this.props.request.canSubmit ? 'orange' : 'green'} 
