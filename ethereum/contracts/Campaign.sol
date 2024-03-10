@@ -72,6 +72,7 @@ contract Campaign
         uint contributors;
         uint totalRequests;
         bool isCancelled;
+        string cancelReason;
     }
 
     struct RequestSummary {
@@ -95,6 +96,7 @@ contract Campaign
     mapping(string => Request) public requests;
     uint private _requestsCount;
     bool private _cancelled;
+    string private _cancelReason;
     constructor (string memory name, string memory description, uint minimum, address mngr)
     {
         require(minimum > 0);
@@ -145,7 +147,8 @@ contract Campaign
             balance: address(this).balance,         
             contributors: _approversCount,
             totalRequests: _requestsCount,
-            isCancelled: _cancelled
+            isCancelled: _cancelled,
+            cancelReason: _cancelReason
         });
 
         return data;
@@ -223,9 +226,9 @@ contract Campaign
         if(req.approvalsCount >= req.requiredApprovals) {
             req.canSubmit = true;
         }
-        if(req.rejectionsCount >= _approversCount){
+        if(req.rejectionsCount >= req.requiredApprovals){
             req.rejected = true;
-            req.rejectReason = "All the contributors have voted for rejection";
+            req.rejectReason = "The majority of the contributors have voted for rejection";
         }
     }
 
@@ -272,8 +275,10 @@ contract Campaign
         requests[reqName].rejected = true;
         requests[reqName].rejectReason = reason;
     }
-    function cancelCampaign() external restricted {
+    function cancelCampaign(string memory reason) external restricted {
+        require(bytes(reason).length > 0);
         _cancelled = true;
+        _cancelReason = reason;
     }
 
 
@@ -283,6 +288,12 @@ contract Campaign
         approvers[msg.sender] = 0;
         _approversCount--;
 
+    }
+
+    function getRemainingBalance() external restricted {
+        require(_cancelled);
+        require(_approversCount == 0);
+        payable(_manager).transfer(address(this).balance);
     }
     modifier restricted() {
         require(msg.sender == _manager);
