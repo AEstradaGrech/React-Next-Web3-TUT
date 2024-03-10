@@ -9,6 +9,7 @@ class AddFundsFormComponent extends Component {
     state = {
         value: 0,
         loading: false,
+        loadingCancel: false,
         errorMessage: '',
         successMessage: ''
     }
@@ -23,7 +24,7 @@ class AddFundsFormComponent extends Component {
                 let campaign = Campaign(this.props.address);
                 let accounts = await web3.eth.getAccounts();
                 await campaign.methods.addFunds().send({from: accounts[0], value: web3.utils.toWei(this.state.value, 'ether')});
-                this.setState({loading: false, successMessage: 'Funds added to campaign' });
+                this.setState({loading: false, successMessage: 'Funds added to campaign', value: 0 });
                 bShouldRefresh = true;
                 
             }
@@ -34,6 +35,26 @@ class AddFundsFormComponent extends Component {
 
         else this.setState({loading: false, errorMessage: 'Invalid input. The amount of funds to send must be grater than 0'})
 
+        this.handleMessageFadeOut(bShouldRefresh);
+        
+    }
+
+    onCancel = async () => {
+        this.setState({loadingCancel: true, errorMessage: '', successMessage: ''});
+        let bShouldRefresh = false; 
+        try{
+            let accounts = await web3.eth.getAccounts();
+            const campaign = Campaign(this.props.address);
+            await campaign.methods.cancelCampaign().send({from: accounts[0]});
+            this.setState({loadingCancel:false, successMessage: 'This campaign has been successfully cancelled'});
+            bShouldRefresh = true; 
+        }catch(error){
+            this.setState({loadingCancel: false, errorMessage: error.message});
+        }
+        this.handleMessageFadeOut(bShouldRefresh);
+    }
+
+    handleMessageFadeOut(bShouldRefresh){
         setTimeout(() => {
             this.setState({successMessage:'', errorMessage:''})
             if(bShouldRefresh)
@@ -42,17 +63,31 @@ class AddFundsFormComponent extends Component {
     }
     render(){
         return (
-            <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage} success={!!this.state.successMessage}>
+            <Form error={!!this.state.errorMessage} success={!!this.state.successMessage}>
                 <Form.Field>
                     <label>Amount:</label>
                     <Input
+                        disabled={this.props.isCancelled}
                         label='ETH'
                         labelPosition='right'
                         value={this.state.value}
                         onChange={(event) => this.setState({value: event.target.value }) }/>
                     
                 </Form.Field>
-                <Button color='red' basic loading={this.state.loading} style={{marginLeft: '131px'}}>Send Funds </Button>
+                <Button disabled={this.props.isCancelled} 
+                        color='red' 
+                        basic 
+                        loading={this.state.loadingCancel} 
+                        onClick={this.onCancel}
+                        floated='left' 
+                        style={{marginLeft:'55px', width:'30%'}}>Cancel </Button>
+                <Button disabled={this.props.isCancelled} 
+                        primary 
+                        basic 
+                        onClick={this.onSubmit}
+                        loading={this.state.loading} 
+                        floated='right' 
+                        style={{marginRight: '55px', width:'30%'}}>Send Funds </Button>
                 <Message error header='Oops!' content={this.state.errorMessage}/>
                 <Message success header='Great!' content={this.state.successMessage}/>
             </Form>

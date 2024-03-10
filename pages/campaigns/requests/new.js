@@ -56,8 +56,8 @@ class NewRequest extends Component {
     }
 
     validateInput() {
-        if(this.state.name.length <= 4){
-            this.setState({errorMessage: 'A Request must have a name with at least 4 characters'});
+        if(this.state.name.length < 3){
+            this.setState({errorMessage: 'A Request must have a name with at least 3 characters'});
             return false;
         }
         if(this.state.description.length > 300){
@@ -88,8 +88,11 @@ class NewRequest extends Component {
     }
     handleErrorFadeOut = () => {
         setTimeout(() => {
+            let success = this.state.successMessage.length > 0;
             this.setState({errorMessage: '', successMessage: ''});
-            Router.replaceRoute(`/campaigns/${this.props.address}/requests`);
+            if(success){
+                Router.replaceRoute(`/campaigns/${this.props.address}/requests`);
+            }
         }, 5000)
     }
 

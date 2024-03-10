@@ -14,7 +14,7 @@ class CampaignShow extends Component{
         const campaign = Campaign(props.query.address);
 
         const summary = await campaign.methods.getSummary().call();
-       
+        console.log(summary);
         const accounts = await web3.eth.getAccounts();
         return{
             address: props.query.address,
@@ -25,7 +25,9 @@ class CampaignShow extends Component{
             minContribution: web3.utils.fromWei(summary.minContribution, 'ether'),
             totalContribution: web3.utils.fromWei(summary.balance, 'ether'),
             contributors: parseInt(summary.contributors),
-            requests: parseInt(summary.totalRequests)
+            requests: parseInt(summary.totalRequests),
+            isCancelled: summary.isCancelled,
+            cancelReason: 'The manager has cancelled the campaign for some reason (TODO: deploy updated contract)'
         }
     }
 
@@ -40,6 +42,19 @@ class CampaignShow extends Component{
         ]
 
         return <Card.Group items={items}/>
+    }
+    renderCancelledCard(){
+        const items = [
+            {
+                header:'Cancelled!',
+                meta: 'This campaign has been cancelled and the contributors can claim their funds',
+                description: `Reason:\n${this.props.cancelReason}`,
+                fluid: true,
+                color:'red'
+            }
+        ]
+
+        return <Card.Group items={items} style={{fontWeight: 600}}/>
     }
     renderCards(){
         const {
@@ -87,6 +102,7 @@ class CampaignShow extends Component{
         return(
             <Layout>
                 {this.renderHeaderCard()}
+                {this.props.isCancelled ? this.renderCancelledCard() : null}
                 <Grid>
                     <Grid.Column width={10}>
                         {this.renderCards()} 
@@ -100,8 +116,8 @@ class CampaignShow extends Component{
                     </Grid.Column>
                     <Grid.Column width={6}>
                         { this.props.connectedAccount === this.props.managerAddress ? 
-                            <AddFundsForm address={this.props.address} /> :
-                            <ContributeForm address={this.props.address} minContribution={this.props.minContribution}/>
+                            <AddFundsForm address={this.props.address} isCancelled={this.props.isCancelled} /> :
+                            <ContributeForm address={this.props.address} isCancelled={this.props.isCancelled} minContribution={this.props.minContribution}/>
                         }
                     </Grid.Column>
                 </Grid>
