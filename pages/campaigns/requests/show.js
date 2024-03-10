@@ -23,6 +23,7 @@ class RequestDetail extends Component{
             recipient: request.receiver,
             amount: web3.utils.fromWei(request.amount, 'ether'),
             approvals: parseInt(request.approvalsCount),
+            rejections: parseInt(request.rejectionsCount),
             requiredVotes: parseInt(request.requiredApprovals),
             totalClaims: parseInt(request.claimsCount),
             claims: claims,
@@ -52,6 +53,19 @@ class RequestDetail extends Component{
                 color: 'red',
                 fluid: true,
                 style:{fontWeight:600}
+            }
+        ]
+
+        return <Card.Group items={items}/>
+    }
+    renderRejectionsCountCard(){
+        const items = [
+            {
+                header: 'Votes for rejection',
+                meta: `${this.props.rejections} contributors have voted for rejection`,
+                color: 'orange',
+                fluid: true,
+                style:{fontWeight:400}
             }
         ]
 
@@ -126,6 +140,7 @@ class RequestDetail extends Component{
                 {this.renderHeaderCard()}
                 { !this.props.isRejected ? null : this.renderRejectionCard()}
                 { this.props.approvals >= this.props.requiredVotes ? this.renderPendingFinalizeCard() : null}
+                { !this.props.isRejected && !this.props.complete && this.props.rejections > 0 ? this.renderRejectionsCountCard() : null}
                 <Grid>
                     <Grid.Column width={11}>
                         {this.renderCards()}

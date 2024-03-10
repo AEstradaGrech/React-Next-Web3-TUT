@@ -89,7 +89,7 @@ class RequestsIndex extends Component {
                             <HeaderCell>Amount (ETH)</HeaderCell>
                             <HeaderCell>Approvals</HeaderCell>
                             <HeaderCell>Claims</HeaderCell>
-                            <HeaderCell>Vote</HeaderCell>
+                            <HeaderCell>Approve</HeaderCell>
                             { this.props.connectedAccount === this.props.campaignManager ?
                                 <HeaderCell>Finalize</HeaderCell> :
                                 <HeaderCell>Reject</HeaderCell>
