@@ -56,7 +56,7 @@ class RequestRowComponent extends Component{
     render(){
         const { Row, Cell } = Table;
         return(
-            <Row disabled={this.props.request.complete}>
+            <Row disabled={this.props.campaignCancelled || this.props.request.complete}>
                 <Cell >
                     <Link route={`/campaigns/${this.props.address}/requests/${this.props.request.name}`}>
                         <b>{this.props.request.name}</b>

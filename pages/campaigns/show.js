@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
-import { Card, Grid, Button } from 'semantic-ui-react';
+import { Card, Grid, Button, Form, Message } from 'semantic-ui-react';
 import web3 from '../../ethereum/web3.js';
 import Campaign from '../../ethereum/campaign.js';
 import Layout from '../../components/layout';
 import ContributeForm from '../../components/contributeForm.js';
 import AddFundsForm from '../../components/addFundsForm.js';
-import { Link } from '../../routes.js';
+import { Link, Router } from '../../routes.js';
 
 class CampaignShow extends Component{
 
+    state = {
+        loadingClaimFunds: false,
+        claimErrorMessage: '',
+        claimSuccessMessage: ''
+    }
     static async getInitialProps(props) //<-- este props object NO es el mismo que se devuelve, es por haber hecho toda la movida de los routes
     {
         const campaign = Campaign(props.query.address);
@@ -94,10 +99,31 @@ class CampaignShow extends Component{
             }
         ]
 
-        return <Card.Group items={items}/>
-  
-        
+        return <Card.Group items={items}/> 
     }
+
+    onClaimFunds = async () => {
+        if(this.props.managerAddress === this.props.connectedAccount) return;
+
+        this.setState({loadingClaimFunds: true, claimErrorMessage: ''});
+        let bShouldRefresh = false;
+        try{
+            const campaign = Campaign(this.props.address);
+            await campaign.methods.claimFunds(this.props.title).send({from: this.props.connectedAccount});
+            this.setState({loadingClaimFunds: false, claimSuccessMessage: 'Get your dirty money, you prick'})
+            bShouldRefresh = true;
+        }catch(error){
+            this.setState({loadingClaimFunds: false, claimErrorMessage: error.message});
+        }
+
+        setTimeout(() => {
+            this.setState({claimErrorMessage: '', claimSuccessMessage: ''});
+            if(bShouldRefresh){
+                Router.replaceRoute(`/campaigns/${this.props.address}`);
+            }
+        }, 5000);
+    }
+
     render(){
         return(
             <Layout>
@@ -117,6 +143,14 @@ class CampaignShow extends Component{
                     <Grid.Column width={6}>
                         { this.props.connectedAccount === this.props.managerAddress ? 
                             <AddFundsForm address={this.props.address} isCancelled={this.props.isCancelled} /> :
+                            this.props.isCancelled ? 
+                            (
+                                <Form error={!!this.state.claimErrorMessage} success={!!this.state.claimSuccessMessage}>
+                                    <Button basic color='red' floated='right' onClick={this.onClaimFunds} loading={this.state.loadingClaimFunds}>Claim Funds</Button>
+                                    <Message error header='Oops!' content={this.state.claimErrorMessage}/>
+                                    <Message success header='OK!' content={this.state.claimSuccessMessage}/>
+                                </Form>
+                            ) :
                             <ContributeForm address={this.props.address} isCancelled={this.props.isCancelled} minContribution={this.props.minContribution}/>
                         }
                     </Grid.Column>

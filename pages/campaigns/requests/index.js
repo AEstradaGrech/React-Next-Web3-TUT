@@ -17,6 +17,7 @@ class RequestsIndex extends Component {
 
         const campaign = Campaign(props.query.address);
         let manager = await campaign.methods.getManager().call()
+        const summary = await campaign.methods.getSummary().call();
         const reqs = await campaign.methods.getRequests().call();
         const requests = await Promise.all(
             Array(reqs.length).fill().map((element, index) => {
@@ -27,7 +28,8 @@ class RequestsIndex extends Component {
             address: props.query.address,
             connectedAccount: accounts[0],
             campaignManager: manager,
-            requests: requests
+            requests: requests,
+            cancelled: summary.isCancelled
         }
     }
 
@@ -57,6 +59,7 @@ class RequestsIndex extends Component {
                     connectedAccount={this.props.connectedAccount}
                     campaignManager={this.props.campaignManager}
                     request={req}
+                    campaignCancelled={this.props.cancelled}
                     onError={this.handleErrorMessage}/>
         })
     }
