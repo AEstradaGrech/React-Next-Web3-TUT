@@ -15,7 +15,7 @@ class RequestDetail extends Component{
         const claims = await contract.methods.getRequestClaims(request.name).call();
         const accounts = await web3.eth.getAccounts();
         const manager = await contract.methods.getManager().call();
-        console.log(':: REQ CLAIMS --> ', claims);
+      
         return { 
             address: props.query.address, 
             requestName: props.query.request,
@@ -47,11 +47,24 @@ class RequestDetail extends Component{
         const items = [
             {
                 header: 'Rejected',
-                meta: 'This request has been rejected and won\'t be submited. Approvers can get their funds back',
-                description: `Reason:\n${this.props.rejectedReason}`,
+                meta: 'This request has been rejected and won\'t be submited.',
+                description: `Reason:\n${this.props.rejectionReason}`,
                 color: 'red',
                 fluid: true,
                 style:{fontWeight:600}
+            }
+        ]
+
+        return <Card.Group items={items}/>
+    }
+    renderPendingFinalizeCard() {
+        const items =[
+            {
+                header:'Pending Finalize',
+                meta: 'This request has the minimum votes to be approved and will be soon finalized',
+                color: 'orange',
+                fluid: true,
+                style: {fontWeight: 600}
             }
         ]
 
@@ -62,8 +75,7 @@ class RequestDetail extends Component{
             recipient,
             amount,
             approvals,
-            requiredVotes,
-            totalClaims
+            requiredVotes
         } = this.props;
 
         const items = [
@@ -93,15 +105,27 @@ class RequestDetail extends Component{
             <Card.Group items={items}/>
         )
     }
-
+    renderClaimRows(){
+        const { Row, Cell } = Table;
+        return this.props.claims.map(element => {
+            return(
+                <Row>
+                    <Cell style={{fontWeight: 600}}>{element.contributor}</Cell>
+                    <Cell>{element.description}</Cell>
+                </Row>
+            )
+        })
+    }
     render(){
+        const { HeaderCell, Header, Row, Body } = Table;
         return(
             <Layout>
-                 <Link route={`/campaigns/${this.props.address}/requests`} >
+                 <Link route={`/campaigns/${this.props.address}/requests`}>
                     {'<<'} Back
                 </Link>
                 {this.renderHeaderCard()}
                 { !this.props.isRejected ? null : this.renderRejectionCard()}
+                { this.props.approvals >= this.props.requiredVotes ? this.renderPendingFinalizeCard() : null}
                 <Grid>
                     <Grid.Column width={11}>
                         {this.renderCards()}
@@ -110,14 +134,28 @@ class RequestDetail extends Component{
                         <RequestClaimComponent 
                             reqName={this.props.requestName} 
                             address={this.props.address}
+                            isRejected={this.props.isRejected}
                             connectedAccount={this.props.connectedAccount} 
                             isManagerForm={this.props.connectedAccount === this.props.managerAddress}/>
                     </Grid.Column>
                 </Grid>
                 {
                     this.props.totalClaims == 0 ? null : 
-                    (<Table>
-
+                    (
+                    <Table>
+                        <Header>
+                            <Row>
+                                <HeaderCell colSpan='2' style={{textAlign:'center', backgroundColor: '#dd930b'}}>Request Claims</HeaderCell>
+                                
+                            </Row>
+                        </Header>
+                        <Body>
+                            <Row style={{textAlign:'center'}}>
+                                <HeaderCell style={{paddingTop: '10px', paddingBottom: '10px'}}>Contributor</HeaderCell>
+                                <HeaderCell style={{paddingTop: '10px', paddingBottom: '10px'}}>Description</HeaderCell>
+                            </Row>
+                            {this.renderClaimRows()}
+                        </Body>
                     </Table>)
                 }
                 

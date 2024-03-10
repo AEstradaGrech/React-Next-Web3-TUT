@@ -61,7 +61,7 @@ class RequestsIndex extends Component {
         })
     }
     render(){
-        const { Header, Row, HeaderCell, Body, Cell } = Table;
+        const { Header, Row, HeaderCell, Body } = Table;
         return(
             <Layout>
                 <Link route={`/campaigns/${this.props.address}`} >
@@ -86,11 +86,14 @@ class RequestsIndex extends Component {
                         <Row>
                             <HeaderCell>Name</HeaderCell>
                             <HeaderCell>Description</HeaderCell>
-                            <HeaderCell>Amount (eth)</HeaderCell>
+                            <HeaderCell>Amount (ETH)</HeaderCell>
                             <HeaderCell>Approvals</HeaderCell>
                             <HeaderCell>Claims</HeaderCell>
                             <HeaderCell>Vote</HeaderCell>
-                            <HeaderCell>Finalize</HeaderCell>
+                            { this.props.connectedAccount === this.props.campaignManager ?
+                                <HeaderCell>Finalize</HeaderCell> :
+                                <HeaderCell>Reject</HeaderCell>
+                            }
                         </Row>
                     </Header>
                     <Body>

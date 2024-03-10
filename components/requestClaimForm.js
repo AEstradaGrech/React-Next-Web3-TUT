@@ -46,6 +46,7 @@ class RequestClaimComponent extends Component{
         return (
             <Form error={!!this.state.errorMessage} success={!!this.state.successMessage}>
                 <TextArea 
+                    disabled={this.props.isRejected}
                     placeholder={this.props.isManagerForm ? 'Reason...' : 'Drop your shit...'}
                     value={this.state.text}
                     onChange={(event) => this.setState({text: event.target.value})}
@@ -57,6 +58,7 @@ class RequestClaimComponent extends Component{
                     onClick={this.onSubmit}
                     style={{marginTop: '10px', marginLeft: '128px'}}
                     content={this.props.isManagerForm ? 'Reject':'Claim'}
+                    disabled={this.props.isRejected}
                     />
                 <Message error header='Oops!' content={this.state.errorMessage}/>
                 <Message success header='Nice' content={this.state.successMessage}/>

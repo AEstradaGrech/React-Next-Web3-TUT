@@ -52,7 +52,7 @@ class ContributeFormComponent extends Component {
                         onChange={(event) => this.setState({value: event.target.value }) }/>
                     
                 </Form.Field>
-                <Button primary loading={this.state.loading}>Contribute </Button>
+                <Button primary loading={this.state.loading} style={{marginLeft: '132px'}}>Contribute </Button>
                 <Message error header='Oops!' content={this.state.errorMessage}/>
                 <Message success header='Great!' content={this.state.successMessage}/>
             </Form>

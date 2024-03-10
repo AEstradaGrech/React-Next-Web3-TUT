@@ -3,7 +3,7 @@ import { Form, Button, Message, Input, Checkbox } from 'semantic-ui-react';
 import Layout from '../../../components/layout.js';
 import Campaign from '../../../ethereum/campaign.js'
 import web3 from '../../../ethereum/web3.js'
-import { Link } from '../../../routes.js';
+import { Link, Router } from '../../../routes.js';
 
 class NewRequest extends Component {
     static async getInitialProps(props){
@@ -60,8 +60,8 @@ class NewRequest extends Component {
             this.setState({errorMessage: 'A Request must have a name with at least 4 characters'});
             return false;
         }
-        if(this.state.description.length > 100){
-            this.setState({errorMessage: 'Request description is too long. It must be shorter than 100 characters'});
+        if(this.state.description.length > 300){
+            this.setState({errorMessage: 'Request description is too long. It must be shorter than 300 characters'});
             return false;
         }
         if(this.state.description.length < 10){
@@ -89,6 +89,7 @@ class NewRequest extends Component {
     handleErrorFadeOut = () => {
         setTimeout(() => {
             this.setState({errorMessage: '', successMessage: ''});
+            Router.replaceRoute(`/campaigns/${this.props.address}/requests`);
         }, 5000)
     }
 

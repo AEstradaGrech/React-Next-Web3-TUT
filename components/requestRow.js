@@ -8,7 +8,8 @@ class RequestRowComponent extends Component{
 
     state = {
         loadingFinalize:false,
-        loadingApprove: false
+        loadingApprove: false,
+        loadingReject: false
     }
     onApprove = async () => {
         if(this.props.request.complete) return;
@@ -36,6 +37,19 @@ class RequestRowComponent extends Component{
         }
         this.setState({loadingFinalize:false});
     }
+    onReject = async () => {
+        if(this.props.request.complete || this.props.request.rejected) return;
+        this.setState({loadingReject: true});
+        try{
+            const campaign = Campaign(this.props.address);
+            await campaign.methods.voteRequest(this.props.request.name, false).send({from: this.props.connectedAccount});
+            Router.replaceRoute(`/campaigns/${this.props.address}/requests`);
+        }catch(error){
+            this.props.onError(error.message);
+        }
+
+        this.setState({loadingReject: false});
+    }
     canFinalize(){
         return this.props.request.canSubmit && this.props.connectedAccount === this.props.campaignManager;
     }
@@ -58,21 +72,29 @@ class RequestRowComponent extends Component{
                     }
                 }>{parseInt(this.props.request.claimsCount)}</Cell>
                 <Cell> 
-                    <Button disabled={this.props.connectedAccount === this.props.campaignManager} 
-                            color={this.props.request.complete ? 'red' : this.props.request.canSubmit ? 'orange' : 'green'} 
+                    <Button disabled={this.props.connectedAccount === this.props.campaignManager || this.props.request.rejected} 
+                            color={(this.props.request.complete || this.props.request.rejected) ? 'red' : this.props.request.canSubmit ? 'orange' : 'green'} 
                             loading={this.state.loadingApprove}
                             basic 
                             onClick={this.onApprove}>Approve
                     </Button>
                 </Cell>
-                <Cell> 
-                    { this.props.request.complete ? null :
-                        <Button disabled={!this.canFinalize() || !this.props.request.canSubmit} color={this.canFinalize() ? 'green' : 'grey'} 
-                                loading={this.state.loadingFinalize}
-                                basic 
-                                onClick={this.onFinalize}>Finalize</Button>
-                    }
-                </Cell>
+                { this.props.connectedAccount === this.props.campaignManager ?
+                    <Cell> 
+                        { this.props.request.complete ? null :
+                            <Button disabled={!this.canFinalize() || !this.props.request.canSubmit} color={this.canFinalize() ? 'green' : 'grey'} 
+                                    loading={this.state.loadingFinalize}
+                                    basic 
+                                    onClick={this.onFinalize}>Finalize</Button>
+                        }
+                    </Cell> :
+                    <Cell>
+                        <Button disabled={this.props.request.complete || this.props.request.rejected} color='red' 
+                                    loading={this.state.loadingReject}
+                                    basic 
+                                    onClick={this.onReject}>Reject</Button>
+                    </Cell>
+                }
             </Row>
         )
     }
